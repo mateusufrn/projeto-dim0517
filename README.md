@@ -15,6 +15,12 @@ O sistema consiste em uma aplicação bancária simples com interação via cons
 
 ---
 
+## Nome do Sistema
+
+`BankFlow Console`
+
+---
+
 ## Funcionalidades
 
 O sistema possui as seguintes operações:

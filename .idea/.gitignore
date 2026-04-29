@@ -1,7 +1,10 @@
 target/
 .idea/
-*.iml
-.class
-.project
-.settings/
 .vscode/
+.settings/
+
+*.iml
+*.class
+*.xml
+*.lst
+.project

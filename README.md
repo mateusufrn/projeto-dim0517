@@ -69,6 +69,21 @@ Nenhum commit deve estar desacoplado de uma tarefa, garantindo rastreabilidade d
 
 ---
 
+## Como Executar o Projeto
+
+Para compilar o projeto, execute:
+
+```bash
+mvn clean compile`
+```
+
+Para rodar a aplicação, execute:
+
+```bash
+mvn exec:java -Dexec.mainClass="br.ufrn.banco.app.Main"
+```
+---
+
 ## Professor / Repositório Compartilhado
 
 O repositório foi compartilhado com o usuário:

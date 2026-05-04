@@ -1,7 +1,10 @@
 package br.ufrn.banco.app;
 
+import br.ufrn.banco.ui.ConsoleMenu;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Sistema Bancário iniciado!");
+        ConsoleMenu menu = new ConsoleMenu();
+        menu.start();
     }
 }

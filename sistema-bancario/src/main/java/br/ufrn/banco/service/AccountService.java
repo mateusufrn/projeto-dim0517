@@ -29,14 +29,14 @@ public class AccountService {
         return null;
     }
 
-    public boolean creditar(int number, double value) {
+    public boolean deposit(int number, double value) {
         Account account = searchAccount(number);
 
         if (account == null || value <= 0) {
             return false;
         }
 
-        account.credit(value);
+        account.deposit(value);
         return true;
     }
 }

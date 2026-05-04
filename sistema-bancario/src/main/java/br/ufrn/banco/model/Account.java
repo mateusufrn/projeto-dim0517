@@ -18,7 +18,7 @@ public class Account {
         return balance;
     }
 
-    public void credit(double valor) {
+    public void deposit(double valor) {
         this.balance += valor;
     }
 

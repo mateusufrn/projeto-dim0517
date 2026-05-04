@@ -39,4 +39,36 @@ public class AccountService {
         account.deposit(value);
         return true;
     }
+
+    public boolean withdraw(int number, double value) {
+        Account account = searchAccount(number);
+
+        if (account == null) {
+            return false;
+        }
+
+        return account.withdraw(value);
+    }
+
+    public boolean transfer(int sourceNumber, int destinationNumber, double value) {
+        if (value <= 0 || sourceNumber == destinationNumber) {
+            return false;
+        }
+
+        Account sourceAccount = searchAccount(sourceNumber);
+        Account destinationAccount = searchAccount(destinationNumber);
+
+        if (sourceAccount == null || destinationAccount == null) {
+            return false;
+        }
+
+        boolean withdrew = sourceAccount.withdraw(value);
+
+        if (!withdrew) {
+            return false;
+        }
+
+        destinationAccount.deposit(value);
+        return true;
+    }
 }

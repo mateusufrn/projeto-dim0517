@@ -23,6 +23,8 @@ public class ConsoleMenu {
                 case 1 -> createAccount();
                 case 2 -> checkBalance();
                 case 3 -> deposit();
+                case 4 -> withdraw();
+                case 5 -> transfer();
                 case 0 -> showMessage("Shutting down system. Goodbye!");
                 default -> showMessage("Invalid option. Please try again.");
             }
@@ -45,6 +47,8 @@ public class ConsoleMenu {
         System.out.println("1. Create Account");
         System.out.println("2. Check Balance");
         System.out.println("3. Deposit");
+        System.out.println("4. Withdraw");
+        System.out.println("5. Transfer");
         System.out.println("0. Exit");
         System.out.println("------------------------------------");
     }
@@ -90,6 +94,37 @@ public class ConsoleMenu {
             showMessage("Deposit completed successfully!");
         } else {
             showMessage("Unable to complete deposit.");
+        }
+    }
+
+    private void withdraw() {
+        showSection("Withdraw");
+
+        int accountNumber = readInt("Enter account number: ");
+        double amount = readDouble("Enter withdrawal amount: ");
+
+        boolean success = accountService.withdraw(accountNumber, amount);
+
+        if (success) {
+            showMessage("Withdrawal completed successfully!");
+        } else {
+            showMessage("Unable to complete withdrawal.");
+        }
+    }
+
+    private void transfer() {
+        showSection("Transfer");
+
+        int sourceAccount = readInt("Enter source account number: ");
+        int destinationAccount = readInt("Enter destination account number: ");
+        double amount = readDouble("Enter transfer amount: ");
+
+        boolean success = accountService.transfer(sourceAccount, destinationAccount, amount);
+
+        if (success) {
+            showMessage("Transfer completed successfully!");
+        } else {
+            showMessage("Unable to complete transfer.");
         }
     }
 

@@ -23,10 +23,6 @@ public class Account {
     }
 
     public boolean withdraw(double value) {
-        if (value <= 0 || value > balance) {
-            return false;
-        }
-
         this.balance -= value;
         return true;
     }

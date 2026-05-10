@@ -8,13 +8,21 @@ public class AccountService {
     private final List<Account> accounts = new ArrayList<>();
 
     public Account registerAccount(int number) {
+        return registerAccount(number, false);
+    }
+
+    public Account registerBonusAccount(int number) {
+        return registerAccount(number, true);
+    }
+
+    public Account registerAccount(int number, boolean isBonusAccount) {
         Account existentAccount = searchAccount(number);
 
         if (existentAccount != null) {
             return null;
         }
 
-        Account newAccount = new Account(number);
+        Account newAccount = new Account(number, isBonusAccount);
         accounts.add(newAccount);
         return newAccount;
     }
@@ -37,6 +45,11 @@ public class AccountService {
         }
 
         account.deposit(value);
+
+        if (account.isBonusAccount()) {
+            account.addBonusPoints(calculateDepositBonusPoints(value));
+        }
+
         return true;
     }
 
@@ -68,7 +81,20 @@ public class AccountService {
             return false;
         }
 
-        destinationAccount.deposit(value);
+        destinationAccount.receiveTransfer(value);
+
+        if (destinationAccount.isBonusAccount()) {
+            destinationAccount.addBonusPoints(calculateTransferBonusPoints(value));
+        }
+
         return true;
+    }
+
+    private int calculateDepositBonusPoints(double value) {
+        return (int) (value / 100);
+    }
+
+    private int calculateTransferBonusPoints(double value) {
+        return (int) (value / 200);
     }
 }

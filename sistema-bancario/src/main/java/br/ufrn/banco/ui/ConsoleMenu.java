@@ -57,7 +57,18 @@ public class ConsoleMenu {
         showSection("Create Account");
 
         int accountNumber = readInt("Enter account number: ");
-        Account account = accountService.registerAccount(accountNumber);
+        int accountType = readInt("Account type (1 - Common, 2 - Bonus): ");
+
+        Account account;
+
+        if (accountType == 2) {
+            account = accountService.registerBonusAccount(accountNumber);
+        } else if (accountType == 1) {
+            account = accountService.registerAccount(accountNumber);
+        } else {
+            showMessage("Invalid account type.");
+            return;
+        }
 
         if (account == null) {
             showMessage("An account with this number already exists.");
@@ -77,7 +88,13 @@ public class ConsoleMenu {
         } else {
             System.out.println("------------------------------------");
             System.out.printf("Account Number: %d%n", account.getNumber());
+            System.out.printf("Account Type: %s%n", account.isBonusAccount() ? "Bonus" : "Common");
             System.out.printf("Balance: $%.2f%n", account.getBalance());
+
+            if (account.isBonusAccount()) {
+                System.out.printf("Bonus Points: %d%n", account.getBonusPoints());
+            }
+
             System.out.println("------------------------------------");
         }
     }

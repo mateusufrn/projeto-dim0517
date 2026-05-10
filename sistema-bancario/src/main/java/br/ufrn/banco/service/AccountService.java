@@ -43,7 +43,7 @@ public class AccountService {
     public boolean withdraw(int number, double value) {
         Account account = searchAccount(number);
 
-        if (account == null) {
+        if (account == null || value <= 0 || value > account.getBalance()) {
             return false;
         }
 

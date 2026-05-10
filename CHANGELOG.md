@@ -1,45 +1,36 @@
 # Changelog
 
-Todas as mudancas relevantes deste projeto serao documentadas neste arquivo.
+Resumo das principais mudanças por versão.
+
+## [1.1.1] - 2026-05-10
+
+### Corrigido
+
+- Débito e transferência agora são bloqueados quando não há saldo suficiente.
+- Ajustes para manter arquivos compilados fora do versionamento.
+
+### Commits incluídos
+
+- `a446c2f` merge da correção de saldo insuficiente na branch de release
+- `46c89eb` correção para impedir operações sem saldo suficiente
 
 ## [1.1] - 2026-05-04
 
 ### Adicionado
 
-- Menu interativo em console (`ConsoleMenu`) com opcoes para:
-  - cadastrar conta
-  - consultar saldo
-  - realizar credito
-  - realizar debito
-  - realizar transferencia
-  - encerrar a aplicacao
-- Fluxo de execucao principal atualizado para iniciar o menu de interacao (`Main` ->
-  `ConsoleMenu.start()`).
-- Operacao de debito no dominio de conta (`Account.withdraw`) com validacao de valor positivo e
-  saldo suficiente.
-- Operacao de transferencia entre contas (`AccountService.transfer`) com validacoes de:
-  - valor positivo
-  - contas de origem e destino diferentes
-  - existencia das contas envolvidas
-  - saldo suficiente na conta de origem
+- Menu interativo no console para as operações principais da conta.
+- Inclusão das operações de débito e transferência entre contas.
 
-### Alterado
+### Manutenção
 
-- Camada de servico (`AccountService`) expandida para suportar as operacoes de debito e
-  transferencia.
-
-### Manutencao
-
-- Arquivo `.gitignore` adicionado para ignorar artefatos de build:
-  - `sistema-bancario/target/`
-  - `*.class`
+- Inclusão de regras no `.gitignore` para evitar versionar artefatos de build.
 - Artefatos compilados removidos do versionamento.
 
-### Commits incluidos
+### Commits incluídos
 
-- `f342f80` feat(operacoes-iniciais#2): implementa menu de interacao e ajusta main
+- `f342f80` feat(operacoes-iniciais#2): implementa menu de interação e ajusta main
 - `72e5cfc` Merge pull request #6 from mateusufrn/feature/02-funcionalidades-inicias-do-sistema
-- `05a919f` feat(operacoes-bancarias#7): implementa debito e transferencia entre contas
-- `2a1f81c` feat(operacoes-bancarias#7): remove arquivos compilados do repositorio
+- `05a919f` feat(operacoes-bancarias#7): implementa débito e transferência entre contas
+- `2a1f81c` feat(operacoes-bancarias#7): remove arquivos compilados do repositório
 - `12a4702` Merge pull request #8 from
   mateusufrn/feature/07-funcionalidades-de-debito-e-transferencia-entre-contas

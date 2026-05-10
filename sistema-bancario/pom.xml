@@ -7,7 +7,7 @@
 
   <groupId>br.ufrn.banco</groupId>
   <artifactId>sistema-bancario</artifactId>
-  <version>1.1</version>
+  <version>1.1.1</version>
   <packaging>jar</packaging>
 
   <name>sistema-bancario</name>

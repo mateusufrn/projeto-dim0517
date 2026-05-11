@@ -25,6 +25,7 @@ public class ConsoleMenu {
                 case 3 -> deposit();
                 case 4 -> withdraw();
                 case 5 -> transfer();
+                case 6 -> applyInterest();
                 case 0 -> showMessage("Shutting down system. Goodbye!");
                 default -> showMessage("Invalid option. Please try again.");
             }
@@ -49,6 +50,7 @@ public class ConsoleMenu {
         System.out.println("3. Deposit");
         System.out.println("4. Withdraw");
         System.out.println("5. Transfer");
+        System.out.println("6. Apply Interest");
         System.out.println("0. Exit");
         System.out.println("------------------------------------");
     }
@@ -57,14 +59,16 @@ public class ConsoleMenu {
         showSection("Create Account");
 
         int accountNumber = readInt("Enter account number: ");
-        int accountType = readInt("Account type (1 - Common, 2 - Bonus): ");
+        int accountType = readInt("Account type (1 - Common, 2 - Bonus, 3 - Savings): ");
 
         Account account;
 
-        if (accountType == 2) {
-            account = accountService.registerBonusAccount(accountNumber);
-        } else if (accountType == 1) {
+        if (accountType == 1) {
             account = accountService.registerAccount(accountNumber);
+        } else if (accountType == 2) {
+            account = accountService.registerBonusAccount(accountNumber);
+        } else if (accountType == 3) {
+            account = accountService.registerSavingsAccount(accountNumber);
         } else {
             showMessage("Invalid account type.");
             return;
@@ -88,7 +92,7 @@ public class ConsoleMenu {
         } else {
             System.out.println("------------------------------------");
             System.out.printf("Account Number: %d%n", account.getNumber());
-            System.out.printf("Account Type: %s%n", account.isBonusAccount() ? "Bonus" : "Common");
+            System.out.printf("Account Type: %s%n", getAccountType(account));
             System.out.printf("Balance: $%.2f%n", account.getBalance());
 
             if (account.isBonusAccount()) {
@@ -170,5 +174,31 @@ public class ConsoleMenu {
         System.out.print("Press ENTER to continue...");
         scanner.nextLine();
         scanner.nextLine();
+    }
+
+    private String getAccountType(Account account) {
+        if (account.isBonusAccount()) {
+            return "Bonus";
+        }
+
+        if (account.isSavingsAccount()) {
+            return "Savings";
+        }
+
+        return "Common";
+    }
+
+    private void applyInterest() {
+        showSection("Apply Interest");
+
+        double interestRate = readDouble("Enter interest rate: ");
+
+        int updatedAccounts = accountService.applyInterestToSavingsAccounts(interestRate);
+
+        if (updatedAccounts == 0) {
+            showMessage("No savings accounts were updated.");
+        } else {
+            showMessage("Interest applied to " + updatedAccounts + " savings account(s).");
+        }
     }
 }

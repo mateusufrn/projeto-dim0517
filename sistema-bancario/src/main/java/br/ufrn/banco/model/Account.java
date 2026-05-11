@@ -4,16 +4,18 @@ public class Account {
 
     private final int number;
     private final boolean bonusAccount;
+    private final boolean savingsAccount;
     private double balance;
     private int bonusPoints;
 
     public Account(int number) {
-        this(number, false);
+        this(number, false, false);
     }
 
-    public Account(int number, boolean bonusAccount) {
+    public Account(int number, boolean bonusAccount, boolean savingsAccount) {
         this.number = number;
         this.bonusAccount = bonusAccount;
+        this.savingsAccount = savingsAccount;
         this.balance = 0.0;
         this.bonusPoints = bonusAccount ? 10 : 0;
     }
@@ -24,6 +26,10 @@ public class Account {
 
     public boolean isBonusAccount() {
         return bonusAccount;
+    }
+
+    public boolean isSavingsAccount() {
+        return savingsAccount;
     }
 
     public double getBalance() {
@@ -51,5 +57,12 @@ public class Account {
     public boolean withdraw(double value) {
         this.balance -= value;
         return true;
+    }
+
+    public void applyInterest(double interestRate) {
+        if (savingsAccount && interestRate > 0) {
+            double interest = balance * (interestRate / 100);
+            deposit(interest);
+        }
     }
 }

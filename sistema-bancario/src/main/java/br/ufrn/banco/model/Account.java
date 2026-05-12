@@ -42,6 +42,7 @@ public class Account {
 
     public void deposit(double value) {
         this.balance += value;
+        return true;
     }
 
     public void receiveTransfer(double value) {
@@ -55,6 +56,10 @@ public class Account {
     }
 
     public boolean withdraw(double value) {
+        if (value <= 0 || value > this.balance) {
+            return false;
+        }
+
         this.balance -= value;
         return true;
     }

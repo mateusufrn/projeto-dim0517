@@ -18,11 +18,20 @@ public class Account {
         return balance;
     }
 
-    public void deposit(double valor) {
-        this.balance += valor;
+    public boolean deposit(double value) {
+        if (value <= 0) {
+            return false;
+        }
+
+        this.balance += value;
+        return true;
     }
 
     public boolean withdraw(double value) {
+        if (value <= 0 || value > this.balance) {
+            return false;
+        }
+
         this.balance -= value;
         return true;
     }

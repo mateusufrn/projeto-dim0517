@@ -32,18 +32,17 @@ public class AccountService {
     public boolean deposit(int number, double value) {
         Account account = searchAccount(number);
 
-        if (account == null || value <= 0) {
+        if (account == null) {
             return false;
         }
 
-        account.deposit(value);
-        return true;
+        return account.deposit(value);
     }
 
     public boolean withdraw(int number, double value) {
         Account account = searchAccount(number);
 
-        if (account == null || value <= 0 || value > account.getBalance()) {
+        if (account == null) {
             return false;
         }
 
@@ -51,7 +50,7 @@ public class AccountService {
     }
 
     public boolean transfer(int sourceNumber, int destinationNumber, double value) {
-        if (value <= 0 || sourceNumber == destinationNumber) {
+        if (sourceNumber == destinationNumber || value <= 0) {
             return false;
         }
 
@@ -68,7 +67,6 @@ public class AccountService {
             return false;
         }
 
-        destinationAccount.deposit(value);
-        return true;
+        return destinationAccount.deposit(value);
     }
 }

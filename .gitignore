@@ -1,0 +1,5 @@
+
+sistema-bancario/target/
+*.class
+.vscode
+mise.toml

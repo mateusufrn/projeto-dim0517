@@ -68,7 +68,13 @@ public class ConsoleMenu {
         } else if (accountType == 2) {
             account = accountService.registerBonusAccount(accountNumber);
         } else if (accountType == 3) {
-            account = accountService.registerSavingsAccount(accountNumber);
+            double initialBalance = readDouble("Enter initial balance: ");
+            account = accountService.registerSavingsAccount(accountNumber, initialBalance);
+
+            if (account == null) {
+                showMessage("Savings account requires a valid initial balance.");
+                return;
+            }
         } else {
             showMessage("Invalid account type.");
             return;

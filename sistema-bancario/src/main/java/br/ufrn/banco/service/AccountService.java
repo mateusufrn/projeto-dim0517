@@ -9,25 +9,29 @@ public class AccountService {
     private final List<Account> accounts = new ArrayList<>();
 
     public Account registerAccount(int number) {
-        return registerAccount(number, false, false);
+        return registerAccount(number, false, false, 0.0);
     }
 
     public Account registerBonusAccount(int number) {
-        return registerAccount(number, true, false);
+        return registerAccount(number, true, false, 0.0);
     }
 
-    public Account registerSavingsAccount(int number) {
-        return registerAccount(number, false, true);
+    public Account registerSavingsAccount(int number, double initialBalance) {
+        if (initialBalance <= 0) {
+            return null;
+        }
+
+        return registerAccount(number, false, true, initialBalance);
     }
 
-    public Account registerAccount(int number, boolean isBonusAccount, boolean isSavingsAccount) {
+    public Account registerAccount(int number, boolean isBonusAccount, boolean isSavingsAccount, double initialBalance) {
         Account existentAccount = searchAccount(number);
 
         if (existentAccount != null) {
             return null;
         }
 
-        Account newAccount = new Account(number, isBonusAccount, isSavingsAccount);
+        Account newAccount = new Account(number, isBonusAccount, isSavingsAccount, initialBalance);
         accounts.add(newAccount);
         return newAccount;
     }
@@ -49,13 +53,13 @@ public class AccountService {
             return false;
         }
 
-        account.deposit(value);
+        boolean deposited = account.deposit(value);
 
-        if (account.isBonusAccount()) {
+        if (deposited && account.isBonusAccount()) {
             account.addBonusPoints(calculateDepositBonusPoints(value));
         }
 
-        return true;
+        return deposited;
     }
 
     public boolean withdraw(int number, double value) {

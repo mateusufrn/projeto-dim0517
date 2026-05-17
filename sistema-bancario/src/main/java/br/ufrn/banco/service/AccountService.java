@@ -8,26 +8,27 @@ public class AccountService {
 
     private final List<Account> accounts = new ArrayList<>();
 
-    public Account registerAccount(int number) {
-        return registerAccount(number, false, false);
+    public Account registerAccount(int number, double initialBalance) {
+        return registerAccount(number, initialBalance, false, false);
     }
 
-    public Account registerBonusAccount(int number) {
-        return registerAccount(number, true, false);
+    public Account registerBonusAccount(int number, double initialBalance) {
+        return registerAccount(number, initialBalance, true, false);
     }
 
-    public Account registerSavingsAccount(int number) {
-        return registerAccount(number, false, true);
+    public Account registerSavingsAccount(int number, double initialBalance) {
+        return registerAccount(number, initialBalance, false, true);
     }
 
-    public Account registerAccount(int number, boolean isBonusAccount, boolean isSavingsAccount) {
+    public Account registerAccount(int number, double initialBalance, boolean isBonusAccount,
+            boolean isSavingsAccount) {
         Account existentAccount = searchAccount(number);
 
-        if (existentAccount != null) {
+        if (existentAccount != null || initialBalance < 0) {
             return null;
         }
 
-        Account newAccount = new Account(number, isBonusAccount, isSavingsAccount);
+        Account newAccount = new Account(number, initialBalance, isBonusAccount, isSavingsAccount);
         accounts.add(newAccount);
         return newAccount;
     }

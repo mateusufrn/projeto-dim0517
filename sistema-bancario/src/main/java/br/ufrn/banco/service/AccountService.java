@@ -118,6 +118,6 @@ public class AccountService {
     }
 
     private int calculateTransferBonusPoints(double value) {
-        return (int) (value / 200);
+        return (int) (value / 150);
     }
 }

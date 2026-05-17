@@ -20,7 +20,8 @@ public class AccountService {
         return registerAccount(number, initialBalance, false, true);
     }
 
-    public Account registerAccount(int number, double initialBalance, boolean isBonusAccount, boolean isSavingsAccount) {
+    public Account registerAccount(int number, double initialBalance, boolean isBonusAccount,
+            boolean isSavingsAccount) {
         Account existentAccount = searchAccount(number);
 
         if (existentAccount != null || initialBalance < 0) {
@@ -117,6 +118,6 @@ public class AccountService {
     }
 
     private int calculateTransferBonusPoints(double value) {
-        return (int) (value / 200);
+        return (int) (value / 150);
     }
 }

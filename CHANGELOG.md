@@ -2,7 +2,7 @@
 
 Resumo das principais mudanças por versão.
 
-## [1.1.1] - 2026-05-10
+## [1.1.2] - 2026-05-11
 
 ### Corrigido
 

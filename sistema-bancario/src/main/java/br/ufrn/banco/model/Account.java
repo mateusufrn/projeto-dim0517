@@ -8,15 +8,11 @@ public class Account {
     private double balance;
     private int bonusPoints;
 
-    public Account(int number) {
-        this(number, false, false);
-    }
-
-    public Account(int number, boolean bonusAccount, boolean savingsAccount) {
+    public Account(int number, double initialBalance, boolean bonusAccount, boolean savingsAccount) {
         this.number = number;
         this.bonusAccount = bonusAccount;
         this.savingsAccount = savingsAccount;
-        this.balance = 0.0;
+        this.balance = initialBalance;
         this.bonusPoints = bonusAccount ? 10 : 0;
     }
 

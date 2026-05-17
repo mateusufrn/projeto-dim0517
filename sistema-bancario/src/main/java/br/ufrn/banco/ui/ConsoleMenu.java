@@ -60,15 +60,21 @@ public class ConsoleMenu {
 
         int accountNumber = readInt("Enter account number: ");
         int accountType = readInt("Account type (1 - Common, 2 - Bonus, 3 - Savings): ");
+        double initialBalance = readDouble("Enter initial balance: ");
+
+        if (initialBalance < 0) {
+            showMessage("Initial balance must be non-negative.");
+            return;
+        }
 
         Account account;
 
         if (accountType == 1) {
-            account = accountService.registerAccount(accountNumber);
+            account = accountService.registerAccount(accountNumber, initialBalance);
         } else if (accountType == 2) {
-            account = accountService.registerBonusAccount(accountNumber);
+            account = accountService.registerBonusAccount(accountNumber, initialBalance);
         } else if (accountType == 3) {
-            account = accountService.registerSavingsAccount(accountNumber);
+            account = accountService.registerSavingsAccount(accountNumber, initialBalance);
         } else {
             showMessage("Invalid account type.");
             return;

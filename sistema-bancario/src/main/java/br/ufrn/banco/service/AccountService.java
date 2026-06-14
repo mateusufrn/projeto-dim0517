@@ -1,9 +1,11 @@
 package br.ufrn.banco.service;
 
 import br.ufrn.banco.model.Account;
+import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class AccountService {
 
     private final List<Account> accounts = new ArrayList<>();

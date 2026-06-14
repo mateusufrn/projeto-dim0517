@@ -38,7 +38,6 @@ public class Account {
 
     public void deposit(double value) {
         this.balance += value;
-        return true;
     }
 
     public void receiveTransfer(double value) {

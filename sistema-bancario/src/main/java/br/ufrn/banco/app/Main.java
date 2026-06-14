@@ -1,10 +1,13 @@
 package br.ufrn.banco.app;
 
-import br.ufrn.banco.ui.ConsoleMenu;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
+@SpringBootApplication
+@ComponentScan(basePackages = {"br.ufrn.banco"})
 public class Main {
     public static void main(String[] args) {
-        ConsoleMenu menu = new ConsoleMenu();
-        menu.start();
+        SpringApplication.run(Main.class, args);
     }
 }

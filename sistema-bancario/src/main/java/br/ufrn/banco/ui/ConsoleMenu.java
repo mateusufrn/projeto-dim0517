@@ -21,11 +21,12 @@ public class ConsoleMenu {
 
             switch (option) {
                 case 1 -> createAccount();
-                case 2 -> checkBalance();
-                case 3 -> deposit();
-                case 4 -> withdraw();
-                case 5 -> transfer();
-                case 6 -> applyInterest();
+                case 2 -> consultAccount();
+                case 3 -> checkBalance();
+                case 4 -> deposit();
+                case 5 -> withdraw();
+                case 6 -> transfer();
+                case 7 -> applyInterest();
                 case 0 -> showMessage("Shutting down system. Goodbye!");
                 default -> showMessage("Invalid option. Please try again.");
             }
@@ -46,11 +47,12 @@ public class ConsoleMenu {
 
     private void showMenu() {
         System.out.println("1. Create Account");
-        System.out.println("2. Check Balance");
-        System.out.println("3. Deposit");
-        System.out.println("4. Withdraw");
-        System.out.println("5. Transfer");
-        System.out.println("6. Apply Interest");
+        System.out.println("2. Consultar Conta");
+        System.out.println("3. Consultar Saldo");
+        System.out.println("4. Deposit");
+        System.out.println("5. Withdraw");
+        System.out.println("6. Transfer");
+        System.out.println("7. Apply Interest");
         System.out.println("0. Exit");
         System.out.println("------------------------------------");
     }
@@ -87,8 +89,8 @@ public class ConsoleMenu {
         }
     }
 
-    private void checkBalance() {
-        showSection("Check Balance");
+    private void consultAccount() {
+        showSection("Consultar Conta");
 
         int accountNumber = readInt("Enter account number: ");
         Account account = accountService.searchAccount(accountNumber);
@@ -106,6 +108,19 @@ public class ConsoleMenu {
             }
 
             System.out.println("------------------------------------");
+        }
+    }
+
+    private void checkBalance() {
+        showSection("Consultar Saldo");
+
+        int accountNumber = readInt("Enter account number: ");
+        Account account = accountService.searchAccount(accountNumber);
+
+        if (account == null) {
+            showMessage("Account not found.");
+        } else {
+            System.out.printf("Balance: $%.2f%n", account.getBalance());
         }
     }
 

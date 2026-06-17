@@ -1,59 +1,60 @@
-name: CI/CD Pipeline
+name: CI/CD - Sistema Bancário Java
 
 on:
   push:
     branches:
-      - main
+      - develop
+
   pull_request:
     branches:
-      - main
-  permissions:
-    contents: write
+      - develop
+    types:
+      - closed
+
+permissions:
+  contents: write
 
 jobs:
-  build:
+  ci-cd:
+    name: Pipeline CI/CD
     runs-on: ubuntu-latest
 
-    steps:
-      # 1. Fazer checkout do código
-      - name: Checkout code
-        uses: actions/checkout@v4
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
 
-      # 2. Configurar o ambiente Java
-      - name: Setup Java
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: maven
+          java-version: '17'
+          cache: 'maven'
 
-      # 3. Resolver as dependências do projeto
-      - name: Resolve dependencies
+      - name: Resolver dependências
         run: mvn dependency:resolve
-        working-directory: ./sistema-bancario
 
-      # 4. Buildar o sistema ou realizar checagem sintática
-      - name: Build project
-        run: mvn clean compile
-        working-directory: ./sistema-bancario
+      - name: Executar testes unitários
+        run: mvn clean test
 
-      # 5. Executar os testes unitários
-      - name: Run unit tests
-        run: mvn test
-        working-directory: ./sistema-bancario
-
-      # 6. Package the application
-      - name: Package application
+      - name: Empacotar aplicação
         run: mvn package -DskipTests
-        working-directory: ./sistema-bancario
 
-      # 7. Criar uma tag no formato build-XXX
-      - name: Create build tag
+      - name: Criar tag build-XXX
         run: |
           TAG="build-${{ github.run_number }}"
           echo "Creating tag: $TAG"
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git tag $TAG
-          git push origin $TAG
 
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists locally."
+          else
+            git tag "$TAG"
+          fi
+
+          git push origin "$TAG"

@@ -11,13 +11,13 @@ on:
     types:
       - closed
 
-permissions:
-  contents: write
-
 jobs:
   ci-cd:
     name: Pipeline CI/CD
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     if: github.event_name == 'push' || github.event.pull_request.merged == true
 
@@ -51,10 +51,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists locally."
-          else
-            git tag "$TAG"
-          fi
-
+          git tag "$TAG"
           git push origin "$TAG"

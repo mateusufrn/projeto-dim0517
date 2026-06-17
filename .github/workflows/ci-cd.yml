@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Fazer checkout do código
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurar o ambiente Java
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # 3. Resolver as dependências do projeto
+      - name: Resolve dependencies
+        run: mvn dependency:resolve
+        working-directory: ./sistema-bancario
+
+      # 4. Buildar o sistema ou realizar checagem sintática
+      - name: Build project
+        run: mvn clean compile
+        working-directory: ./sistema-bancario
+
+      # 5. Executar os testes unitários
+      - name: Run unit tests
+        run: mvn test
+        working-directory: ./sistema-bancario
+
+      # 6. Package the application
+      - name: Package application
+        run: mvn package -DskipTests
+        working-directory: ./sistema-bancario
+
+      # 7. Criar uma tag no formato build-XXX
+      - name: Create build tag
+        run: |
+          TAG="build-${{ github.run_number }}"
+          echo "Creating tag: $TAG"
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag $TAG
+          git push origin $TAG
+

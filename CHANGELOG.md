@@ -1,3 +1,11 @@
+## [1.3.0] - 2026-06-21
+
+### Adicionado
+
+- Pipeline de estabilização com geração automática de tags RC via GitHub Actions.
+
+---
+
 ## [1.2.0] - 2026-05-17
 
 ### Adicionado

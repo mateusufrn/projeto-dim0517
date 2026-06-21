@@ -41,6 +41,7 @@ O sistema possui as seguintes operações:
 - Git + GitHub
 - GitLabFlow para gerenciamento de branches
 - GitHub Issues para rastreabilidade das tarefas
+- GitHub Actions para integração e entrega contínua
 
 ---
 

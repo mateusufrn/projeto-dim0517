@@ -1,0 +1,59 @@
+name: CI/CD - Sistema Bancário Java
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  ci-cd:
+    name: Pipeline CI/CD
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+          cache-dependency-path: sistema-bancario/pom.xml
+
+      - name: Resolver dependências
+        working-directory: ./sistema-bancario
+        run: mvn dependency:resolve
+
+      - name: Executar testes unitários
+        working-directory: ./sistema-bancario
+        run: mvn clean test
+
+      - name: Empacotar aplicação
+        working-directory: ./sistema-bancario
+        run: mvn package -DskipTests
+
+      - name: Criar tag build-XXX
+        run: |
+          TAG="build-${{ github.run_number }}"
+          echo "Creating tag: $TAG"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag "$TAG"
+          git push origin "$TAG"

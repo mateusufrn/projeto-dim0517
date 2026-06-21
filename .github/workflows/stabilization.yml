@@ -1,0 +1,106 @@
+name: Iniciar estabilizacao
+
+on:
+  pull_request:
+    branches:
+      - staging
+    types:
+      - closed
+
+jobs:
+  create-release-candidate:
+    name: Criar release candidate
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.ref == 'main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout do commit integrado em staging
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: sistema-bancario/pom.xml
+
+      - name: Resolver dependencias
+        working-directory: ./sistema-bancario
+        run: mvn dependency:resolve
+
+      - name: Compilar sistema
+        working-directory: ./sistema-bancario
+        run: mvn clean compile
+
+      - name: Executar analise estatica com PMD
+        working-directory: ./sistema-bancario
+        run: mvn pmd:check
+
+      - name: Executar testes unitarios
+        working-directory: ./sistema-bancario
+        run: mvn test
+
+      - name: Gerar JAR da aplicacao
+        working-directory: ./sistema-bancario
+        run: mvn package -DskipTests
+
+      - name: Calcular proxima tag RC
+        id: rc-version
+        shell: bash
+        run: |
+          git fetch --tags --force
+
+          LATEST_RC=$(git tag --list 'rc-*' \
+            | grep -E '^rc-[0-9]+\.[0-9]+(\.[0-9]+)?$' \
+            | sort -V \
+            | tail -n 1 || true)
+
+          if [ -z "$LATEST_RC" ]; then
+            LATEST_RC="rc-1.0"
+          fi
+
+          VERSION=${LATEST_RC#rc-}
+          IFS='.' read -r MAJOR MINOR _PATCH <<< "$VERSION"
+          NEXT_TAG="rc-${MAJOR}.$((MINOR + 1))"
+
+          if git rev-parse "refs/tags/$NEXT_TAG" >/dev/null 2>&1; then
+            echo "A tag $NEXT_TAG ja existe."
+            exit 1
+          fi
+
+          echo "Ultima tag RC: $LATEST_RC"
+          echo "Nova tag RC: $NEXT_TAG"
+          echo "tag=$NEXT_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Gerar pacote da versao
+        env:
+          RC_TAG: ${{ steps.rc-version.outputs.tag }}
+        run: |
+          mkdir -p dist
+          zip -j "dist/${RC_TAG}.zip" sistema-bancario/target/*.jar
+
+      - name: Publicar pacote em Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.rc-version.outputs.tag }}.zip
+          path: dist/${{ steps.rc-version.outputs.tag }}.zip
+          if-no-files-found: error
+
+      - name: Criar e publicar tag RC
+        env:
+          RC_TAG: ${{ steps.rc-version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$RC_TAG" -m "Inicio da estabilizacao $RC_TAG"
+          git push origin "$RC_TAG"

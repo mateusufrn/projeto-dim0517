@@ -1,102 +1,104 @@
-# Projeto DIM0517 — Sistema Bancário em Console
+# Projeto DIM0517 - Sistema Bancario API REST
 
-Projeto desenvolvido para a disciplina DIM0517 – Gerência de Configuração e Mudanças, com foco na aplicação de boas práticas de controle de versão utilizando Git e GitHub, seguindo o fluxo GitLabFlow.
-
-O sistema consiste em uma aplicação bancária simples com interação via console, contendo operações básicas de gerenciamento de contas e movimentações financeiras.
-
----
+Projeto desenvolvido para a disciplina DIM0517 - Gerencia de Configuracao e
+Mudancas. O sistema oferece uma API REST para cadastro de contas e realizacao
+de operacoes bancarias.
 
 ## Integrantes
 
-- Mateus Nascimento — GitHub: @mateusufrn
-- Bianca Antonelly — GitHub: @biancaantonelly
-- Caio Vitor — GitHub: @caiovitordm
+- Mateus Nascimento - GitHub: @mateusufrn
+- Bianca Antonelly - GitHub: @biancaantonelly
+- Caio Vitor - GitHub: @caiovitordm
 
-
----
-
-## Nome do Sistema
-
-`BankFlow Console`
-
----
-
-## Funcionalidades
-
-O sistema possui as seguintes operações:
-
-- Cadastrar Conta
-- Consultar Saldo
-- Realizar Crédito
-- Realizar Débito
-- Realizar Transferência
-
----
-
-## Stack de Desenvolvimento
+## Tecnologias
 
 - Java 17
+- Spring Boot 3.2
 - Maven
-- Aplicação Console (Java Scanner)
-- Git + GitHub
-- GitLabFlow para gerenciamento de branches
-- GitHub Issues para rastreabilidade das tarefas
-- GitHub Actions para integração e entrega contínua
+- JUnit 5
+- PMD
+- Docker
+- GitHub Actions
 
----
+## Executar com Maven
 
-### Separação em Camadas
-
-O projeto segue uma estrutura em camadas para facilitar manutenção e testes futuros:
-
-- ui/ → interação com o usuário (console)
-- service/ → regras de negócio
-- model/ → entidades do sistema
-- app/ → classe principal de execução
-
----
-
-## Controle de Versão
-
-O repositório utiliza:
-
-- Branch main, staging, production
-- Pull Requests para integração
-- Issues vinculadas a commits e alterações
-
-Nenhum commit deve estar desacoplado de uma tarefa, garantindo rastreabilidade durante todo o desenvolvimento.
-
----
-
-## Observações
-
-- Não há persistência em banco de dados
-- O foco principal da disciplina é o uso correto de Git e boas práticas de configuração
-- Interface e usabilidade não são critérios de avaliação
-
----
-
-## Como Executar o Projeto
-
-Para compilar o projeto, execute:
+Na raiz do repositorio:
 
 ```bash
-mvn clean compile`
+cd sistema-bancario
+mvn spring-boot:run
 ```
 
-Para rodar a aplicação, execute:
+A API ficara disponivel em `http://localhost:8080/api`.
+
+## Executar com Docker
+
+A imagem esta publicada no
+[Docker Hub](https://hub.docker.com/r/biancaantonellyt/bankflow-api).
 
 ```bash
-mvn exec:java -Dexec.mainClass="br.ufrn.banco.app.Main"
+docker pull biancaantonellyt/bankflow-api:latest
+docker run --rm -p 8080:8080 biancaantonellyt/bankflow-api:latest
 ```
----
 
-## Professor / Repositório Compartilhado
+## Endpoints
 
-O repositório foi compartilhado com o usuário:
+| Metodo | Endpoint | Descricao |
+| --- | --- | --- |
+| `POST` | `/api/banco/conta/` | Cadastrar conta |
+| `GET` | `/api/banco/conta/{id}` | Consultar dados da conta |
+| `GET` | `/api/banco/conta/{id}/saldo` | Consultar saldo |
+| `PUT` | `/api/banco/conta/{id}/credito` | Realizar credito |
+| `PUT` | `/api/banco/conta/{id}/debito` | Realizar debito |
+| `PUT` | `/api/banco/conta/transferencia` | Realizar transferencia |
+| `PUT` | `/api/banco/conta/rendimento` | Aplicar rendimento |
 
-gibeonufrn
+## Exemplos
 
-conforme solicitado na especificção da disciplina.
+Cadastrar uma conta:
 
----
+```bash
+curl -X POST http://localhost:8080/api/banco/conta/ \
+  -H "Content-Type: application/json" \
+  -d '{"numero":1,"tipo":"normal","saldoInicial":500.0}'
+```
+
+Consultar os dados da conta:
+
+```bash
+curl http://localhost:8080/api/banco/conta/1
+```
+
+Consultar o saldo:
+
+```bash
+curl http://localhost:8080/api/banco/conta/1/saldo
+```
+
+Realizar um credito:
+
+```bash
+curl -X PUT http://localhost:8080/api/banco/conta/1/credito \
+  -H "Content-Type: application/json" \
+  -d '{"valor":100.0}'
+```
+
+Realizar uma transferencia:
+
+```bash
+curl -X PUT http://localhost:8080/api/banco/conta/transferencia \
+  -H "Content-Type: application/json" \
+  -d '{"from":1,"to":2,"amount":50.0}'
+```
+
+## CI/CD
+
+O projeto utiliza GitHub Actions para integracao continua, estabilizacao e
+liberacao em producao.
+
+- Merge de `staging` em `production`: cria uma tag `rel-X.Y`.
+- Merge de `hotfix/*` em `production`: cria uma tag `rel-X.Y.Z`.
+- Cada liberacao executa build, PMD e testes, gera um artefato ZIP e publica
+  uma imagem versionada no Docker Hub.
+
+Nao e realizado deploy em um ambiente de execucao.

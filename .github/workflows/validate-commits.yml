@@ -1,0 +1,64 @@
+name: Validar mensagens de commit
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  validate-commits:
+    name: Verificar mensagens dos commits
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositorio
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validar mensagens dos commits do PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          FAILED=0
+
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+
+            SHA=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+
+            # Verificacao 1: formato da mensagem
+            if ! echo "$MSG" | grep -qE '^#[0-9]+ - .+'; then
+              echo "ERRO commit ${SHA}: mensagem fora do formato esperado."
+              echo "  Mensagem:        $MSG"
+              echo "  Formato esperado: #NUM_ISSUE - MENSAGEM"
+              FAILED=1
+              continue
+            fi
+
+            # Extrai o numero da issue
+            ISSUE_NUM=$(echo "$MSG" | grep -oE '^#[0-9]+' | tr -d '#')
+
+            # Verificacao 2: issue deve existir no repositorio
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${REPO}/issues/${ISSUE_NUM}")
+
+            if [ "$STATUS" != "200" ]; then
+              echo "ERRO commit ${SHA}: issue #${ISSUE_NUM} nao encontrada no repositorio."
+              FAILED=1
+              continue
+            fi
+
+            echo "OK commit ${SHA}: $MSG"
+          done < <(git log --no-merges --format="%H %s" "$BASE_SHA".."$HEAD_SHA")
+
+          if [ "$FAILED" = "1" ]; then
+            exit 1
+          fi

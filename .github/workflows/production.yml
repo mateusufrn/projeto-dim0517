@@ -1,0 +1,137 @@
+name: Liberar versao em producao
+
+on:
+  pull_request:
+    branches:
+      - production
+    types:
+      - closed
+
+jobs:
+  publish-release:
+    name: Publicar release
+    if: >-
+      github.event.pull_request.merged == true &&
+      (github.event.pull_request.head.ref == 'staging' ||
+      startsWith(github.event.pull_request.head.ref, 'hotfix'))
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      IMAGE_NAME: biancaantonellyt/bankflow-api
+
+    steps:
+      - name: Checkout do commit integrado em production
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+          cache-dependency-path: sistema-bancario/pom.xml
+
+      - name: Resolver dependencias
+        working-directory: ./sistema-bancario
+        run: mvn dependency:resolve
+
+      - name: Compilar sistema
+        working-directory: ./sistema-bancario
+        run: mvn clean compile
+
+      - name: Executar analise estatica com PMD
+        working-directory: ./sistema-bancario
+        run: mvn pmd:check
+
+      - name: Executar testes unitarios
+        working-directory: ./sistema-bancario
+        run: mvn test
+
+      - name: Gerar JAR da aplicacao
+        working-directory: ./sistema-bancario
+        run: mvn package -DskipTests
+
+      - name: Calcular proxima tag de release
+        id: release-version
+        shell: bash
+        env:
+          SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git fetch --tags --force
+
+          LATEST_REL=$(git tag --list 'rel-*' \
+            | grep -E '^rel-[0-9]+\.[0-9]+(\.[0-9]+)?$' \
+            | sort -V \
+            | tail -n 1 || true)
+
+          if [ -z "$LATEST_REL" ]; then
+            LATEST_REL="rel-1.0"
+          fi
+
+          VERSION=${LATEST_REL#rel-}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          if [ "$SOURCE_BRANCH" = "staging" ]; then
+            NEXT_TAG="rel-${MAJOR}.$((MINOR + 1))"
+          else
+            PATCH=${PATCH:-0}
+            NEXT_TAG="rel-${MAJOR}.${MINOR}.$((PATCH + 1))"
+          fi
+
+          if git rev-parse "refs/tags/$NEXT_TAG" >/dev/null 2>&1; then
+            echo "A tag $NEXT_TAG ja existe."
+            exit 1
+          fi
+
+          echo "Ultima tag de release: $LATEST_REL"
+          echo "Nova tag de release: $NEXT_TAG"
+          echo "tag=$NEXT_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Gerar pacote da versao
+        env:
+          RELEASE_TAG: ${{ steps.release-version.outputs.tag }}
+        run: |
+          mkdir -p dist
+          zip -j "dist/${RELEASE_TAG}.zip" sistema-bancario/target/*.jar
+
+      - name: Publicar pacote em Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.release-version.outputs.tag }}.zip
+          path: dist/${{ steps.release-version.outputs.tag }}.zip
+          if-no-files-found: error
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Construir e publicar imagem Docker
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.release-version.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:latest
+
+      - name: Criar e publicar tag de release
+        env:
+          RELEASE_TAG: ${{ steps.release-version.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -a "$RELEASE_TAG" -m "Liberacao $RELEASE_TAG"
+          git push origin "$RELEASE_TAG"

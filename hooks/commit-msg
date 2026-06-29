@@ -1,0 +1,43 @@
+#!/bin/bash
+
+COMMIT_MSG=$(head -1 "$1")
+
+# Verificacao 1: formato da mensagem
+if ! echo "$COMMIT_MSG" | grep -qE '^#[0-9]+ - .+'; then
+    echo "Erro: mensagem de commit fora do formato esperado."
+    echo "  Formato:  #NUM_ISSUE - MENSAGEM"
+    echo "  Exemplo:  #33 - Correcao da mensagem da tela principal"
+    exit 1
+fi
+
+# Extrai o numero da issue
+ISSUE_NUM=$(echo "$COMMIT_MSG" | grep -oE '^#[0-9]+' | tr -d '#')
+
+# Detecta o repositorio a partir do remote origin
+REPO=$(git remote get-url origin 2>/dev/null \
+    | sed 's/.*github\.com[:/]\(.*\)\.git$/\1/' \
+    | sed 's/.*github\.com[:/]\(.*\)$/\1/')
+
+if [ -z "$REPO" ]; then
+    echo "Aviso: nao foi possivel detectar o repositorio GitHub. Verificacao 2 ignorada."
+    exit 0
+fi
+
+# Verificacao 2: issue deve existir no repositorio do GitHub
+API_URL="https://api.github.com/repos/${REPO}/issues/${ISSUE_NUM}"
+
+if [ -n "$GITHUB_TOKEN" ]; then
+    STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        "$API_URL")
+else
+    STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL")
+fi
+
+if [ "$STATUS" != "200" ]; then
+    echo "Erro: issue #${ISSUE_NUM} nao encontrada no repositorio ${REPO}."
+    echo "  Verifique se o numero da issue existe no GitHub."
+    exit 1
+fi
+
+exit 0
